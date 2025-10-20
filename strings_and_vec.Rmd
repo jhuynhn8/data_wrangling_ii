@@ -15,6 +15,9 @@ library(rvest)
 library(p8105.datasets)
 library(stringr)
 library(forcats)
+library(tidyverse)
+library(rvest)
+library(httr)
 ```
 
 ## Mostly use string vectors 
@@ -97,6 +100,58 @@ vec_sex ##Output shows us that there are levels
 as.numeric(vec_sex)
 vec_sex=fct_inorder(vec_sex)
 vec_sex #changes the order 
+```
+
+# Revisiting NSDUH 
+
+## Extracting tables: Import NSDUH DATA from the web 
+
+```{r}
+URL = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+drug_use_html=read_html(URL)
+```
+
+This is an easy case becasue instead of using a CSS selector we are able to jsut get the tables directly 
+
+```{r}
+ndsuh_df= drug_use_html %>% #definitely still needs to tidied: things were made strings instead of numbers; and columns are containing more than one thing age and date 
+  html_table() %>% 
+  first() %>% 
+  slice(-1)
+```
+
+No we must do the tidying... 
+
+```{r}
+marj_df =
+  ndsuh_df %>% 
+  select(-contains("P Value")) %>% 
+  pivot_longer(
+    -State,
+    names_to="age_year",
+    values_to="percent"
+  ) %>% 
+  separate(age_year,into=c("age","year"), sep="\\(") %>% 
+  mutate(
+    year=str_remove(year,"\\)"),
+    percent=str_remove(percent,"[a-c]$"),
+    percent=as.numeric(percent)
+  ) %>% 
+  filter(
+    !(State %in% c("Total U.S.","Northeast","Midwest","South","West"))
+  )
+```
+
+Let's make a quick plot 
+
+```{r}
+marj_df %>% 
+  filter(age=="12-17") %>% 
+  mutate(State=fct_reorder(State,percent)) %>% 
+  ggplot(aes(x=State,y=percent,color=year))+
+  geom_point() +
+  theme(axis.text.x=element_text(angle=90,hjust=1))
 ```
 
 
