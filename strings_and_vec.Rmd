@@ -1,0 +1,103 @@
+---
+title: "strings_and_factors"
+output: html_document
+date: "2025-10-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries 
+
+```{r}
+library(rvest)
+library(p8105.datasets)
+library(stringr)
+library(forcats)
+```
+
+## Mostly use string vectors 
+
+```{r}
+string_vec= c("my","name","is","jeff")
+str_detect(string_vec,"jeff")
+str_detect(string_vec,"e")
+str_detect(string_vec,"Jeff") #note this is case sensitive 
+
+str_replace(string_vec, "jeff","Jeff")
+str_replace(string_vec,"e","")
+str_remove(string_vec,"e")
+```
+
+(copied from p8105) 
+
+```{r}
+string_vec = c(
+  "i think we all rule for participating",
+  "i think i have been caught",
+  "i think this will be quite fun actually",
+  "it will be fun, i think"
+  )
+
+str_detect(string_vec, "i think")
+str_detect(string_vec, "^i think") #look at the beginning 
+str_detect(string_vec, "i think$") #look at the end 
+
+str_remove(string_vec,"i think$")
+```
+
+Pumpkin themed example ! 
+
+```{r}
+string_vec = c(
+  "Time for a Pumpkin Spice Latte!",
+  "went to the #pumpkinpatch last weekend",
+  "Pumpkin Pie is obviously the best pie",
+  "SMASHING PUMPKINS -- LIVE IN CONCERT!!"
+  )
+
+str_detect(string_vec,"pumpkin")
+str_detect(string_vec,"Pumpkin")
+str_detect(string_vec,"[Pp]umpkin") #bracket says that anything in there counts but anything outside of it must match 
+```
+
+Let's get a bit more complicated 
+
+```{r}
+string_vec = c(
+  '7th inning stretch',
+  '1st half soon to begin. Texas won the toss.',
+  'she is 5 feet 4 inches tall',
+  '3AM - cant sleep :('
+  )
+
+str_detect(string_vec, "^[0-9][a-zA-Z]")
+```
+
+```{r}
+string_vec = c(
+  'Its 7:11 in the evening',
+  'want to go to 7-11?',
+  'my flight is AA711',
+  'NetBios: scanning ip 203.167.114.66'
+  )
+
+str_detect(string_vec, "7.1") #the dot recognized as -,"",. 
+str_detect(string_vec, "7\\.1") #\\ makes it so that only looks for 7.1 
+
+```
+
+## Factors 
+
+```{r}
+vec_sex = factor(c("male", "male", "female", "female"))
+vec_sex ##Output shows us that there are levels 
+
+as.numeric(vec_sex)
+vec_sex=fct_inorder(vec_sex)
+vec_sex #changes the order 
+```
+
+
+

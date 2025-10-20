@@ -1,0 +1,98 @@
+---
+title: "reading_data_from_the_web"
+output: html_document
+date: "2025-10-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading Library 
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(httr)
+```
+
+## Extracting tables: Import NSDUH DATA from the web 
+
+```{r}
+URL = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+drug_use_html=read_html(URL)
+```
+
+This is an easy case becasue instead of using a CSS selector we are able to jsut get the tables directly 
+
+```{r}
+ndsuh_df= drug_use_html %>% #definitely still needs to tidied: things were made strings instead of numbers; and columns are containing more than one thing age and date 
+  html_table() %>% 
+  first() %>% 
+  slice(-1)
+```
+
+Slightly harder code 
+
+```{r}
+url="https://www.imdb.com/list/ls070150896/"
+sw_html=read_html(url)
+```
+
+Now pull out elements of the HTML that I am interested in ==> need selector gadget
+```{r}
+title_vec= sw_html %>% 
+  html_elements(".ipc-title-link-wrapper .ipc-title__text--reduced") %>% 
+  html_text()
+
+metascore_vec=sw_html %>% 
+  html_elements(".metacritic-score-box") %>% 
+  html_text()
+
+runtime_vec=sw_html %>% 
+  html_elements(".dli-title-metadata-item:nth-child(2)") %>% 
+  html_text()
+
+#creating a df 
+sw_df= 
+  tibble(
+    title=title_vec,
+    metascore=metascore_vec,
+    runtime=runtime_vec
+  )
+```
+
+Get data using API 
+
+# API 
+
+```{r}
+nyc_water_df = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.csv") |> 
+  content("parsed")
+
+nyc_water_df %>% 
+  ggplot(aes(x=year,y=nyc_consumption_million_gallons_per_day))+
+  geom_point()
+```
+
+ACCESS BRFSS 
+
+```{r}
+brfss_df=
+  GET("https://chronicdata.cdc.gov/api/v3/views/acme-vg9e/query.csv")
+#would need an application token ; sometimes website will give you //  query=list("appToken"))
+```
+
+Look at Pokemon data 
+
+```{r}
+poke = 
+  GET("http://pokeapi.co/api/v2/pokemon/1") |>
+  content()
+
+poke[["name"]]
+```
+
+
